@@ -1,9 +1,17 @@
+import os
+from dotenv import load_dotenv
 import pandas as pd
 from openai import OpenAI
 import json
 
+load_dotenv()
+
+# Load the data
+df = pd.read_csv("data/transcriptions.csv")
+df.head()
+
 # Initialize the OpenAI client
-client = OpenAI()
+client = OpenAI(api_key = os.getenv("OPENAI_API_KEY"))
 
 ## Start coding here, use as many cells as you need
 
