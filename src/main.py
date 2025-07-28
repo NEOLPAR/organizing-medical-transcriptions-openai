@@ -1,4 +1,5 @@
 import os
+from pathlib import Path
 from dotenv import load_dotenv
 import pandas as pd
 from openai import OpenAI
@@ -7,7 +8,9 @@ import json
 load_dotenv()
 
 # Load the data
-df = pd.read_csv("data/transcriptions.csv")
+BASE_DIR = Path(__file__).resolve().parent
+transcriptions_filepath = os.path.join(BASE_DIR, 'data', 'transcriptions.csv')
+df = pd.read_csv(transcriptions_filepath)
 df.head()
 
 # Initialize the OpenAI client
@@ -102,18 +105,21 @@ def extract_icd10(patient_details):
 
     return json.loads(response_extract_icd_10.choices[0].message.tool_calls[0].function.arguments)
 
-    results = []
-    for idx, row in df.iterrows():
-        specialty = row["medical_specialty"]
-        text = row["transcription"]
+results = []
+for idx, row in df.iterrows():
+    specialty = row["medical_specialty"]
+    text = row["transcription"]
 
-        patient_data = extract_patient_data(text)
-        patient_data['medical_specialty'] = specialty
+    patient_data = extract_patient_data(text)
+    patient_data['medical_specialty'] = specialty
 
-        extracted_icd10 = extract_icd10(patient_data)
-        patient_data['icd10'] = extracted_icd10['icd10']
+    extracted_icd10 = extract_icd10(patient_data)
+    patient_data['icd10'] = extracted_icd10['icd10']
 
-        results.append(patient_data)
+    results.append(patient_data)
 
-    df_structured = pd.DataFrame(results)
-    df_structured.head()
+df_structured = pd.DataFrame(results)
+df_structured.head()
+
+processed_filepath = os.path.join(BASE_DIR, 'data', 'processed_data.csv')
+df_structured.to_csv(processed_filepath, index=False)  # Save to file
