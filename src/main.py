@@ -41,7 +41,7 @@ def extract_patient_data(text):
         }
     }]
     responseExtracting = client.chat.completions.create(
-        model="gpt-4.1-mini",
+        model="gpt-4.1",
         max_completion_tokens=200,
         messages=[{
             "role": "system",
@@ -53,11 +53,7 @@ def extract_patient_data(text):
         }],
         temperature=0.7,
         response_format={"type":"json_object"},
-        tools=function_definition,
-        tool_choice={
-            "type": "function",
-            "function": {"name": "extract_medical_data"}
-        }
+        tools=function_definition
     )
     return json.loads(responseExtracting.choices[0].message.tool_calls[0].function.arguments)
 
@@ -80,7 +76,7 @@ def extract_icd10(patient_details):
         }
     }]
     response_extract_icd_10 = client.chat.completions.create(
-        model="gpt-4.1-mini",
+        model="gpt-4.1",
         max_completion_tokens=100,
         messages=[{
             "role": "system",
@@ -104,11 +100,7 @@ def extract_icd10(patient_details):
         }],
         temperature=0.7,
         response_format={"type": "json_object"},
-        tools=icd10_function_definition,
-        tool_choice={   # needed to force the function as gpt-4.1-mini is not as reliable as 4o for function calling, still not good results
-            "type": "function",
-            "function": {"name": "extract_icd_10"}
-        }
+        tools=icd10_function_definition
     )
 
     return json.loads(response_extract_icd_10.choices[0].message.tool_calls[0].function.arguments)
